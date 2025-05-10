@@ -1,226 +1,245 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Madridejos Cebu Barangays Map</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../includes/leaflet.css" />
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Omsim</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
 
-    #map {
-      height: 100vh;
-      width: 100%;
-    }
+    <link rel="stylesheet" href="../includes/css/css/themes/default/jquery.mobile-1.4.5.min.css"/>
+    <link rel="stylesheet" href="../includes/css/css/themes/default/index.css"/>
+    <script src="../includes/js/jquery.js"></script>
+    <script src="../includes/js/jquery.mobile-1.4.5.min.js"></script>
 
-    a {
-      text-decoration: none;
-      color: black;
-    }
+    <style>
+        .header {
+            position: fixed;
+            text-align: center;
+            padding: 10px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f0f0f0;
+        }
+        .icon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px;
+        }
+        .icon.right {
+            left: auto;
+            right: 30px;
+        }
 
-    .sidebar {
-      height: 100vh;
-      width: 250px;
-      position: fixed;
-      top: 0;
-      left: -250px;
-      background-color: #f4f4f4;
-      overflow-x: hidden;
-      transition: 0.3s;
-      padding-top: 60px;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      z-index: 1000;
-    }
+        .total-entries {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff007b, #007bff, #00ff88);
+            background-size: 300% 300%;
+            color: white;
+            padding: 10px;
+            margin: 15px auto;
+            border-radius: 8px;
+            width: 80%;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            animation: fadeInScale 0.8s ease-in-out, gradientShift 4s infinite linear;
+        }
 
-    .sidebar a {
-      padding: 15px 20px;
-      display: block;
-      color: black;
-      text-decoration: none;
-      font-weight: bold;
-    }
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
 
-    .sidebar a:hover {
-      background-color: #ddd;
-    }
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
 
-    .open-btn {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      z-index: 1100;
-      font-size: 24px;
-      background-color: #fff;
-      border: none;
-      cursor: pointer;
-      padding: 10px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-      border-radius: 5px;
-      transition: left 0.3s, right 0.3s;
-    }
+        body.dark-mode .ui-page,
+        body.dark-mode .ui-panel,
+        body.dark-mode .ui-content {
+            background-color: #121212 !important;
+            color: #e0e0e0 !important;
+        }
 
-    .open-btn.moved {
-      left: auto;
-      right: 15px;
-    }
+        body.dark-mode .ui-btn {
+            background-color: #333 !important;
+            color: #fff !important;
+            border: none;
+        }
 
-    .popup {
-      display: none;
-      background-color: rgba(0,0,0,0.5);
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      justify-content: center;
-      align-items: center;
-      z-index: 1100;
-    }
+        body.dark-mode .total-entries {
+            background: linear-gradient(45deg, #333, #555, #777);
+        }
 
-    .popup-content {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      text-align: center;
-      width: 200px;
-    }
+        body.dark-mode .header {
+            background-color: #1e1e1e;
+        }
 
-    .popup-content p {
-      margin-bottom: 20px;
-      font-size: 16px;
-    }
+        body.dark-mode a.icon {
+            color: white;
+        }
 
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .button-group button {
-      width: 150px;
-      padding: 10px 0;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 25px;
-      cursor: pointer;
-      background-color: white;
-      transition: background-color 0.2s;
-    }
-
-    .button-group button:hover {
-      background-color: #f0f0f0;
-    }
-  </style>
+        .ui-btn1 {
+            border-radius: 20px !important;
+        }
+    </style>
 </head>
 <body>
+    <div data-role="page" id="page1">
+        <div data-role="header" class="header">
+            <h1></h1>
+            <a href="#" class="icon" id="menuIcon" onclick="toggleNavbar()">&#9776;</a>
+        </div>
 
-  <div id="mySidebar" class="sidebar">
-    <center>
-      <a href="home.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="#" id="exitConfirmButton">Exit</a>
-    </center>
-  </div>
-
-  <button class="open-btn" onclick="toggleSidebar()">☰</button>
-
-  <div id="popupCloseRight" class="popup">
-    <div class="popup-content">
-      <p>Are you sure you want to Exit?</p>
-      <div class="button-group">
-        <button id="exitButton">Yes</button>
-        <button id="closePopup">No</button>
-      </div>
+        <div data-role="panel" id="overlaypanel" data-position="left" data-display="overlay">
+            <br><br>
+            <a onclick="window.location.href='home.html'" class="ui-btn">Home</a>
+            <a onclick="window.location.href='about.html'" class="ui-btn">About</a>
+            <a id="exitConfirmButton" class="ui-btn"  data-rel="popup" data-position-to="window" data-transition="pop">Exit</a>
+            <div data-role="popup" id="popupCloseRight" class="ui-content">
+                <p>Are you sure you want to Exit?</p>
+               <a href="#" id="exitButton"  class="ui-btn ui-btn1" data-role="button" data-theme="a">Yes</a>
+                <a href="#" id="closePopup" class="ui-btn ui-btn1" data-role="button" data-theme="a">No</a>
+                </div>
+        </div>
+        <br><br>
+        <hr>
+        <center><h1>Barangay Pili
+        </h1></center>
+        <div role="main" class="ui-content" style="text-align: center;">
+            <a class="animated-heading" href="#popup1" data-rel="popup" data-position-to="window" data-transition="fade">
+                <img src="../includes/img/d1.png" height="200" width="200px" alt="">
+            </a>
+            <center>
+                <a href="#popup1" data-rel="popup" data-position-to="window" data-transition="fade"
+                style="text-decoration: none; color: rgb(75, 72, 72);"
+                 >
+                    <p class="animated-heading">This is the map of pili.</p>
+                </a>
+            </center>            
+            <div data-role="popup" id="popup1" data-overlay-theme="b" data-corners="false" style="max-height: 80vh; overflow-y: auto;">
+                <div style="padding: 10px;">
+                    <img  class="popphoto " src="../includes/img/d1.png" style="max-height: 512px; width: 100%; height: auto;">
+                    <center>
+                        <p >
+                          This is the map of pili.
+                        </p>
+                    </center>
+                </div>
+            </div>
+            <hr>
+            <a class="animated-heading" href="#popup2" data-rel="popup" data-position-to="window" data-transition="fade">
+                <img src="../includes/img/d2.jpg" height="200" width="200px" alt="">
+            </a>
+            <center>
+                <a href="#popup2" data-rel="popup" data-position-to="window" data-transition="fade"
+                style="text-decoration: none; color: rgb(75, 72, 72);"
+                 >
+                    <p class="animated-heading">More Details</p>
+                </a>
+            </center>            
+            <div data-role="popup" id="popup2" data-overlay-theme="b" data-corners="false" style="max-height: 80vh; overflow-y: auto;">
+                <div style="padding: 10px;">
+                    <img class="popphoto" src="../includes/img/d2.jpg" style="max-height: 512px; width: 100%; height: auto;">
+                    <center>
+                        <p class="animated-heading" >
+                          Barangay Pili
+                        </p>
+                    </center>
+                </div>
+            </div>
+            <hr>
+            <a class="animated-heading" href="#popup3" data-rel="popup" data-position-to="window" data-transition="fade">
+                <img src="../includes/img/d3.jpg" height="200" width="200px" alt="">
+            </a>
+            <center>
+                <a href="#popup3" data-rel="popup" data-position-to="window" data-transition="fade"
+                style="text-decoration: none; color: rgb(75, 72, 72);"
+                 >
+                    <p class="animated-heading">More Details</p>
+                </a>
+            </center>            
+            <div data-role="popup" id="popup3" data-overlay-theme="b" data-corners="false" style="max-height: 80vh; overflow-y: auto;">
+                <div style="padding: 10px;">
+                    <img class="popphoto" src="../includes/img/d3.jpg" style="max-height: 512px; width: 100%; height: auto;">
+                    <center>
+                        <p >
+                          Dita
+                        </p>
+                    </center>
+                </div>
+            </div>
+            <br><br><br><br><br><br><br>
+        </div>
+        <script src="../includes/js/js/index.js"></script>
+        <script type="text/javascript">
+            // Toggle dark mode manually (if needed from elsewhere)
+            function toggleDarkMode() {
+                $('body').toggleClass('dark-mode');
+                if ($('body').hasClass('dark-mode')) {
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+        
+            // Initialize and bind dark mode events
+            $(document).ready(function () {
+                // Apply saved theme on page load
+                if (localStorage.getItem('theme') === 'dark') {
+                    $('body').addClass('dark-mode');
+                }
+        
+                $(document).on('click', '#enableDarkMode', function () {
+                    $('body').addClass('dark-mode');
+                    localStorage.setItem('theme', 'dark');
+                    $("#darkModePopup").popup("close"); // Close the popup
+                    closePanel();
+                });
+        
+                $(document).on('click', '#disableDarkMode', function () {
+                    $('body').removeClass('dark-mode');
+                    localStorage.setItem('theme', 'light');
+                    $("#darkModePopup").popup("close"); // Close the popup
+                    closePanel();
+                });
+            });
+        </script>
+        <script>
+            function toggleNavbar() {
+                var panel = $("#overlaypanel");
+                var icon = $("#menuIcon");
+                if (panel.hasClass("ui-panel-open")) {
+                    panel.panel("close");
+                    icon.removeClass("right");
+                } else {
+                    panel.panel("open");
+                    icon.addClass("right");
+                }
+            }
+            
+        
+            function closePanel() {
+                $("#overlaypanel").panel("close");
+                $("#menuIcon").removeClass("right");
+            }
+        
+            // Reset icon when panel closes manually
+            $(document).on("panelclose", "#overlaypanel", function() {
+                $("#menuIcon").removeClass("right");
+            });
+        </script>
+        
     </div>
-  </div>
-  <br><br><br><br>
-<center><h1>Barangay Pili</h1></center>
-<table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; margin: 20px auto; padding-left: 20px; padding-right: 20px;">
-  <tr><td>Population % (2020)</td><td>11.02%</td></tr>
-  <tr><td>Population (2020)</td><td>4,719</td></tr>
-  <tr><td>Population (2015)</td><td>3,963</td></tr>
-  <tr><td>Change (2015–2020)</td><td>19.06%</td></tr>
-  <tr><td>Annual Growth Rate</td><td>3.53%</td></tr>
-  <tr><td>Barangay Captain</td><td>Margarita Desucatan Caranzo</td></tr>
-</table>
-<p style="text-align: justify; padding-left: 20px; padding-right: 20px;">
-  Barangay Pili, located in the municipality of Madridejos on Bantayan Island, Cebu, is a coastal community that offers a blend of natural beauty and cultural experiences.
-
-</p>
-<h1 style="font-size: 20px;">
-🌿 Local Attractions
-</h1>
-<p style="text-align: justify; padding-left: 20px; padding-right: 20px;">
-  1. Ship House and Mini Zoo
-  A unique attraction in Barangay Pili is the Ship House, a residence designed to resemble a ship, complete with nautical features. Adjacent to it is a mini zoo that houses various animals, providing an educational and enjoyable experience for visitors of all ages. This combination offers a distinctive glimpse into the creativity and hospitality of the local community.
-
-</p>
-<h1 style="font-size: 20px;">
-🏛️ Historical Significance
-</h1>
-<p style="text-align: justify; padding-left: 20px; padding-right: 20px;">
-  Presidio de Lawis (Kota Park): Located in Madridejos, this Spanish-era fortification, established around 1628-1630, is considered the Philippines' oldest-surviving original Spanish military fort structure. It played a crucial role in defending the area against Moro pirates and serves as a testament to the region's colonial history.
-
-  Watchtowers in Nearby Barangays: Historical records indicate the presence of watchtowers in neighboring barangays like Kaongkod, built during the Spanish period to monitor and warn against pirate invasions. These structures underscore the strategic importance of the area during colonial times.
-
-</p>
-<h1 style="font-size: 20px;">
-🛣️ Infrastructure Development
-</h1>
-<p style="text-align: justify; padding-left: 20px; padding-right: 20px;">
-  In recent developments, Barangay Pili has been part of infrastructure improvement projects aimed at enhancing transportation and commerce in the area. These initiatives are expected to boost local tourism and provide better access to the barangay's attractions.
-</p>
-<script>
-        // Toggle Sidebar function
-        function toggleSidebar() {
-      var sidebar = document.getElementById("mySidebar");
-      var btn = document.querySelector(".open-btn");
-
-      if (sidebar.style.left === "0px") {
-        sidebar.style.left = "-250px"; // hide the sidebar
-        btn.classList.remove("moved"); // move button back to the left
-      } else {
-        sidebar.style.left = "0px"; // show the sidebar
-        btn.classList.add("moved"); // move button to the right
-      }
-    }
-
-    // Close the sidebar if clicking outside of it
-    document.addEventListener('click', function(event) {
-      var sidebar = document.getElementById("mySidebar");
-      var btn = document.querySelector(".open-btn");
-
-      // Check if the click is outside the sidebar and the button
-      if (!sidebar.contains(event.target) && !btn.contains(event.target) && sidebar.style.left === "0px") {
-        sidebar.style.left = "-250px"; // hide the sidebar
-        btn.classList.remove("moved"); // move button back to the left
-      }
-    });
-</script>
-<script>
-  $(document).ready(function () {
-    // Show the exit confirmation popup
-    $(document).on("click", "#exitConfirmButton", function () {
-      $("#popupCloseRight").css("display", "flex"); // Show the popup
-    });
-
-    // Close the exit confirmation popup
-    $(document).on("click", "#closePopup", function () {
-      $("#popupCloseRight").css("display", "none"); // Hide the popup
-    });
-
-    // Exit and redirect to a blank page
-    document.getElementById("exitButton").addEventListener("click", function () {
-      window.location.href = "about:blank"; // Redirect to blank page
-    });
-  });
-</script>
 </body>
-</html>
+</html> 
